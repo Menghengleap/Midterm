@@ -1,4 +1,6 @@
 <?php
+header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
 // This file can serve as the entry point for the Categories API.
 // You can direct requests to the appropriate file based on the request method,
 // but since you asked not to add anything, this is just a placeholder.

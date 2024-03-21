@@ -1,4 +1,6 @@
 <?php
+header("Content-Type: application/json");
+header("Access-Control-Allow-Origin: *");
 // This file can act as a router or entry point for different API requests.
 // Typically, you would use this to direct requests to different files based on the request method and path.
 // For simplicity, here's just a placeholder content:
