@@ -22,8 +22,8 @@ class Database {
         $this->conn = null;
     
         try {
-            // Corrected DSN string for PostgreSQL
-            $dsn = "pgsql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->db_name . ";options='--client_encoding=UTF8'";
+            // DSN without the client_encoding option
+            $dsn = "pgsql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->db_name;
             $this->conn = new PDO($dsn, $this->username, $this->password);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -33,4 +33,5 @@ class Database {
     
         return $this->conn;
     }
+    
 }
