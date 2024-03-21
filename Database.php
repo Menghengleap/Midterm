@@ -5,7 +5,7 @@ class Database {
     private $db_name;
     private $username;
     private $password;
-    public $conn;
+    private $conn;
     private $port;
 
     // Constructor
