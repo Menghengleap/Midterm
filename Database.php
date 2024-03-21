@@ -19,11 +19,14 @@ class Database {
 
     // Getting the database connection
     public function getConnection() {
-        $this->conn = null;
-    
-        try {
-            // DSN without the client_encoding option
+        if ($this->conn){
+            return $this->conn;
+        } else{
             $dsn = "pgsql:host={$this->host};port={$this->port};dbname={$this->db_name}";
+        }
+        
+    
+        try {  
             $this->conn = new PDO($dsn, $this->username, $this->password);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
