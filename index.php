@@ -9,7 +9,7 @@ require_once 'controllers/QuotesController.php';
 require_once 'controllers/AuthorsController.php';
 require_once 'controllers/CategoriesController.php';
 
-// Initializing the database connection
+// Initializing the database connectionnnn
 $database = new Database();
 $db = $database->getConnection();
 
