@@ -58,7 +58,7 @@
 </head>
 
 <body>
-    <h1>Sean Wood's Midterm REST API</h1>
+    <h1>hiiiiiiii</h1>
     <div class="container">
         <p>Welcome to the REST API example. This page demonstrates a modern design approach.</p>
         <button class="button">Learn More</button>
