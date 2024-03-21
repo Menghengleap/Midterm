@@ -1,50 +1,83 @@
-<?php
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-require_once __DIR__ . '/../models/Quote.php';
-require_once __DIR__ . '/../models/Author.php';
-require_once __DIR__ . '/../models/Category.php';
-require_once __DIR__ . '/../Database.php';
+<?php 
+  // Headers
+  header('Access-Control-Allow-Origin: *');
+  header('Content-Type: application/json');
+  header('Access-Control-Allow-Methods: PUT');
+  header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-$db = (new Database())->getConnection();
-$quoteModel = new Quote($db);
-$authorModel = new Author($db);
-$categoryModel = new Category($db);
+  include_once '../../config/Database.php';
+  include_once '../../models/Quote.php';
+  include_once '../../models/Author.php';
+  include_once '../../models/Category.php';
 
-$data = json_decode(file_get_contents("php://input"), true);
+  // Instantiate DB & connect
+  $database = new Database();
+  $db = $database->connect();
 
-// Check if all required parameters are provided
-if (empty($data['id']) || empty($data['quote']) || empty($data['author_id']) || empty($data['category_id'])) {
-    http_response_code(400);
-    echo json_encode(["message" => "Missing Required Parameters"]);
-    return;
+  // Instantiate blog post object
+  $quo = new DBQuote($db);
+
+  // Get raw posted data
+  $data = json_decode(file_get_contents("php://input"));
+
+  //data is not set
+  if(!isset($data->id) || !isset($data->quote) || !isset($data->author_id) || !isset($data->category_id)){
+    echo json_encode(array('message' => 'Missing Required Parameters'));
+    exit();
 }
 
-// Verify if the provided author_id and category_id exist
-if (!$authorModel->readOne($data['author_id'])) {
-    http_response_code(404);
-    echo json_encode(["message" => "author_id Not Found"]);
-    return;
-}
+  // Set ID to update
+  $quo->id = $data->id;
+  $quo->quote = $data->quote;
+  $quo->author_id = $data->author_id;
+  $quo->category_id = $data->category_id;
 
-if (!$categoryModel->readOne($data['category_id'])) {
-    http_response_code(404);
-    echo json_encode(["message" => "category_id Not Found"]);
-    return;
-}
 
-// Attempting to update the quote
-$quoteModel->id = $data['id'];
-$quoteModel->quote = $data['quote'];
-$quoteModel->author_id = $data['author_id'];
-$quoteModel->category_id = $data['category_id'];
+  $auth = new DBAuthor($db);
+    $cat = new DBCategory($db);
+    $auth->id = $quo->author_id;
+    $cat->id = $quo->category_id;
 
-if ($quoteModel->update()) {
-    http_response_code(200);
-    echo json_encode(["message" => "Quote updated successfully."]);
-} else {
-    http_response_code(503);
-    echo json_encode(["message" => "Unable to update quote."]);
-}
+    //conduct checks on category and author ids
+    $cat->read_single();
+    if(!$cat->category){
+        echo json_encode(array(
+            'message' => 'category_id Not Found'
+        ));
+        exit();
+    }
+
+    $auth->read_single();
+    if(!$auth->author){
+        echo json_encode(array(
+            'message' => 'author_id Not Found'
+        ));
+        exit();
+    }
+
+    $test = curl_init('http://localhost/api/quotes/?id=' . $quo->id);
+    curl_setopt($test, CURLOPT_RETURNTRANSFER, true); // Set option to return the response
+    $response = curl_exec($test); // Execute the request and store the response
+    curl_close($test); // Close the cURL session
+    $test2 = array_values(json_decode($response,true));
+
+    if($test2[0] != $quo->id){
+
+      echo json_encode(array(
+          'message' => 'No Quotes Found'
+      ));
+      exit();
+    }
+
+  //Update quote
+  if($quo->update()) {
+
+    $quo_arr = array(
+      'id' => $quo->id,
+      'quote' => $quo->quote,
+      'author_id' => $quo->author_id,
+      'category_id' => $quo->category_id,
+    );
+    echo json_encode($quo_arr);
+  } 
+

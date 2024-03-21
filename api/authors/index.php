@@ -1,30 +1,62 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header('Content-Type: application/json');
+    $method = $_SERVER['REQUEST_METHOD'];
 
-// Include necessary files
-require_once __DIR__ . '/../models/Quote.php';
-require_once __DIR__ . '/../Database.php';
+    if ($method === 'OPTIONS') {
+        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+        header('Access-Control-Allow-Headers: Origin, Accept, Content-Type, X-Requested-With');
+        exit();
+    }
+    // If statement for type
+    if ($method === 'GET') {
+        try {
+            if (isset($_GET['id'])){
+            require_once 'read_single.php';
+            }
+            else{
+            require_once 'read.php';
+            }
 
-// Create a new database connection
-$db = (new Database())->getConnection();
+        }
+        catch(ErrorException $e)
+        {
+            echo("Required file not found!");
+        
+        }
+    }
+    else if ($method === 'POST') {
+        try {
+            require_once 'create.php';
 
-// Create a new instance of the Quote model
-$quoteModel = new Quote($db);
+        }
+        catch(ErrorException $e)
+        {
+            echo("Required file not found!");
+        
+        }
+    }
+    else if ($method === 'PUT') {
+        try {
+            require_once 'update.php';
 
-// Fetch all quotes (no filtering parameters provided)
-$stmt = $quoteModel->read();
+        }
+        catch(ErrorException $e)
+        {
+            echo("Required file not found!");
+        
+        }
+    }
+    else if ($method === 'DELETE') {
+        try {
+            require_once 'delete.php';
 
-// Fetch the quotes as an associative array
-$quotes = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Check if quotes were found
-if ($quotes) {
-    // Output the quotes as JSON
-    echo json_encode($quotes);
-} else {
-    // No quotes found
-    http_response_code(404);
-    echo json_encode(["message" => "No quotes found"]);
-}
-?>
+        }
+        catch(ErrorException $e)
+        {
+            echo("Required file not found!");
+        
+        }
+    }
+    else
+        echo ("No function requested");

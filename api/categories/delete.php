@@ -1,26 +1,42 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-require_once __DIR__ . '/../models/Category.php';
-require_once __DIR__ . '/../Database.php';
+  // Headers
+  header('Access-Control-Allow-Origin: *');
+  header('Content-Type: application/json');
+  header('Access-Control-Allow-Methods: DELETE');
+  header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization,X-Requested-With');
 
-$db = (new Database())->getConnection();
-$categoryModel = new Category($db);
+  include_once '../../config/Database.php';
+  include_once '../../models/Category.php';
 
-$data = json_decode(file_get_contents("php://input"), true);
+  // Instantiate DB & connect
+  $database = new Database();
+  $db = $database->connect();
 
-if (!empty($data['id'])) {
-    $categoryModel->id = $data['id'];
-    if ($categoryModel->delete()) {
-        http_response_code(200);
-        echo json_encode(["message" => "Category deleted successfully."]);
-    } else {
-        http_response_code(503);
-        echo json_encode(["message" => "Unable to delete category."]);
+  // Instantiate category post object
+  $cat = new DBCategory($db);
+
+  // Get raw posted data
+  $data = json_decode(file_get_contents("php://input"));
+
+  // Set ID to UPDATE
+  $cat->id = $data->id;
+
+  $test = curl_init('http://localhost/api/categories/?id=' . $cat->id);
+    curl_setopt($test, CURLOPT_RETURNTRANSFER, true); // Set option to return the response
+    $response = curl_exec($test); // Execute the request and store the response
+    curl_close($test); // Close the cURL session
+    $test2 = array_values(json_decode($response,true));
+    if($test2[0] != $cat->id){
+
+      echo json_encode(array(
+          'message' => 'No Category Found'
+      ));
+      exit();
     }
-} else {
-    http_response_code(400);
-    echo json_encode(["message" => "Missing Required Parameters"]);
-}
+
+  // Delete Category
+  if($cat->delete()) {
+    echo json_encode(
+      array('id' => $cat->id)
+    );
+  } 

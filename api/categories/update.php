@@ -1,27 +1,43 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-require_once __DIR__ . '/../models/Category.php';
-require_once __DIR__ . '/../Database.php';
+  // Headers
+  header('Access-Control-Allow-Origin: *');
+  header('Content-Type: application/json');
+  header('Access-Control-Allow-Methods: PUT');
+  header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization,X-Requested-With');
 
-$db = (new Database())->getConnection();
-$categoryModel = new Category($db);
+  include_once '../../config/Database.php';
+  include_once '../../models/Category.php';
+  
+  // Instantiate DB & connect
+  $database = new Database();
+  $db = $database->connect();
 
-$data = json_decode(file_get_contents("php://input"), true);
+  // Instantiate blog post object
+  $cat = new DBCategory($db);
 
-if (!empty($data['id']) && !empty($data['category'])) {
-    $categoryModel->id = $data['id'];
-    $categoryModel->category = $data['category'];
-    if ($categoryModel->update()) {
-        http_response_code(200);
-        echo json_encode(["message" => "Category updated successfully."]);
-    } else {
-        http_response_code(503);
-        echo json_encode(["message" => "Unable to update category."]);
-    }
-} else {
-    http_response_code(400);
-    echo json_encode(["message" => "Missing Required Parameters"]);
+  // Get raw posted data
+  $data = json_decode(file_get_contents("php://input"));
+
+  if(!isset($data->id) || !isset($data->category)){
+    echo json_encode(array('message' => 'Missing Required Parameters'));
+    exit();
 }
+
+  // Set ID to UPDATE
+  $cat->id = $data->id;
+
+  $cat->category = $data->category;
+
+  $category_arr = array(
+    'id' => $cat->id,
+    'category' => $cat->category
+  );
+
+  // Update post
+  if($cat->update()) {
+    echo json_encode($category_arr);
+  } else {
+    echo json_encode(
+      array('message' => 'Category not updated')
+    );
+  }

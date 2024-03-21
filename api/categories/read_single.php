@@ -1,24 +1,36 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-require_once __DIR__ . '/../models/Category.php';
-require_once __DIR__ . '/../Database.php';
+  // Headers
+  header('Access-Control-Allow-Origin: *');
+  header('Content-Type: application/json');
 
-$db = (new Database())->getConnection();
-$categoryModel = new Category($db);
+  include_once '../../config/Database.php';
+  include_once '../../models/Category.php';
 
-$id = isset($_GET['id']) ? $_GET['id'] : die(json_encode(['message' => 'ID not provided']));
+  // Instantiate DB & connect
+  $database = new Database();
+  $db = $database->connect();
 
-if ($categoryModel->readOne($id)) {
-    $category_item = [
-        "id" => $categoryModel->id,
-        "category" => $categoryModel->category
-    ];
-    http_response_code(200);
-    echo json_encode($category_item);
-} else {
-    http_response_code(404);
-    echo json_encode(["message" => "Category not found."]);
-}
+  // Instantiate category post object
+  $cat = new DBCategory($db);
+
+  // Get ID
+  $cat->id = isset($_GET['id']) ? $_GET['id'] : die();
+
+  // Get post
+  $cat->read_single();
+
+  // Create array
+  $category_arr = array(
+    'id' => $cat->id,
+    'category' => $cat->category
+  );
+
+
+  if($category_arr['category']!=null){
+  // Make JSON
+  echo json_encode($category_arr);
+  }else{
+    echo json_encode(
+      array('message' => 'category_id Not Found')
+    );
+  }

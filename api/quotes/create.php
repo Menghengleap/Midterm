@@ -1,43 +1,72 @@
-<?php
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-require_once __DIR__ . '/../models/Quote.php';
-require_once __DIR__ . '/../models/Author.php';
-require_once __DIR__ . '/../models/Category.php';
-require_once __DIR__ . '/../Database.php';
+<?php 
+  // Headers
+  header('Access-Control-Allow-Origin: *');
+  header('Content-Type: application/json');
+  header('Access-Control-Allow-Methods: POST');
+  header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-$db = (new Database())->getConnection();
-$quoteModel = new Quote($db);
-$authorModel = new Author($db);
-$categoryModel = new Category($db);
+  include_once '../../config/Database.php';
+  include_once '../../models/Quote.php';
+  include_once '../../models/Author.php';
+  include_once '../../models/Category.php';
 
-$data = json_decode(file_get_contents("php://input"), true);
+  // Instantiate DB & connect
+  $database = new Database();
+  $db = $database->connect();
 
-// Checking if all required parameters are provided
-if (empty($data['quote']) || empty($data['author_id']) || empty($data['category_id'])) {
-    http_response_code(400);
-    echo json_encode(["message" => "Missing Required Parameters"]);
-    return;
-}
+  // Instantiate blog post object
+  $quo = new DBQuote($db);
 
-// Verifying existence of author and category
-if (!$authorModel->readOne($data['author_id']) || !$categoryModel->readOne($data['category_id'])) {
-    http_response_code(404);
-    echo json_encode(["message" => "author_id or category_id Not Found"]);
-    return;
-}
+  //create author and category object
+  $auth = new DBAuthor($db);
+  $cat = new DBCategory($db);
 
-// Attempting to create quote
-$quoteModel->quote = $data['quote'];
-$quoteModel->author_id = $data['author_id'];
-$quoteModel->category_id = $data['category_id'];
+  // Get raw posted data
+  $data = json_decode(file_get_contents("php://input"));
 
-if ($quoteModel->create()) {
-    http_response_code(201);
-    echo json_encode(["message" => "Quote created successfully."]);
-} else {
-    http_response_code(503);
-    echo json_encode(["message" => "Unable to create quote."]);
-}
+  //if data is not all set, send error message and exit
+  if ( !isset($data->quote) || !isset($data->author_id) || !isset($data->category_id))
+  {
+      echo json_encode(array('message' => 'Missing Required Parameters'));
+      exit();
+  }
+
+  $quo->quote = $data->quote;
+  $quo->author_id = $data->author_id;
+  $quo->category_id = $data->category_id;
+
+  $auth->id = $data->author_id;
+  $cat->id = $data->category_id;
+
+
+    //Check category
+    $cat->read_single();
+    if(!$cat->category){
+        echo json_encode(array('message' => 'category_id Not Found'));
+        exit ();
+    }
+    //check author
+    $auth->read_single();
+    if(!$auth->author){
+        echo json_encode(array('message' => 'author_id Not Found'));
+        exit();
+    }
+
+  // Create quote
+  if($quo->create()) {
+
+    $quo->id = $db->lastInsertId();
+
+    $quo_arr = array(
+      'id' => $quo->id,
+      'quote' => $quo->quote,
+      'author_id' => $quo->author_id,
+      'category_id' => $quo->category_id,
+    );
+    echo json_encode($quo_arr);
+
+  } else {
+    echo json_encode(
+      array('message' => 'Quote Not Created')
+    );
+  }

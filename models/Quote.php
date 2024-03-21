@@ -1,137 +1,196 @@
-<?php
-class Quote {
+<?php 
+    class DBQuote {
+    // DB stuff
     private $conn;
-    private $table_name = "quotes";
+    private $table = 'quotes';
 
-    // Object properties
+    // Post Properties
     public $id;
     public $quote;
     public $author_id;
+    public $author_name;
     public $category_id;
+    public $category_name;
 
+    // Constructor with DB
     public function __construct($db) {
         $this->conn = $db;
     }
 
-    // Function to read all quotes with optional filtering by author_id and/or category_id
-    public function read($author_id = null, $category_id = null) {
-        $query = "SELECT q.id, q.quote, a.author, c.category 
-                  FROM " . $this->table_name . " q
-                  JOIN authors a ON q.author_id = a.id
-                  JOIN categories c ON q.category_id = c.id";
+    // Get Quotes
+    public function read() {
+      
+      // Create query
+      if (isset($this->author_id) && isset($this->category_id)){
+        $query = "SELECT c.category as category_name, a.author as author_name, p.id, p.category_id, p.quote, p.author_id
+                                FROM $this->table p
+                                LEFT JOIN categories c ON p.category_id = c.id
+                                LEFT JOIN authors a ON p.author_id = a.id
+                                WHERE p.author_id = ? AND p.category_id = ?";
 
-        // Filter by author_id and category_id if provided
-        $conditions = [];
-        $parameters = [];
+                  // Prepare statement
+                  $stmt = $this->conn->prepare($query);
+                  // Bind ID
+                  $stmt->bindParam(1, $this->author_id);
+                  $stmt->bindParam(2, $this->category_id);
+      }else if (isset($this->author_id)){
+        $query = "SELECT c.category as category_name, a.author as author_name, p.id, p.category_id, p.quote, p.author_id
+                                FROM $this->table p
+                                LEFT JOIN categories c ON p.category_id = c.id
+                                LEFT JOIN authors a ON p.author_id = a.id
+                                WHERE p.author_id = ?";
+                  // Prepare statement
+                  $stmt = $this->conn->prepare($query);
 
-        if (!is_null($author_id)) {
-            $conditions[] = 'q.author_id = :author_id';
-            $parameters[':author_id'] = $author_id;
-        }
+                  // Bind ID
+                  $stmt->bindParam(1, $this->author_id);
+      }
+      else if(isset($this->category_id)){
+        $query = "SELECT c.category as category_name, a.author as author_name, p.id, p.category_id, p.quote, p.author_id
+                                FROM $this->table p
+                                LEFT JOIN categories c ON p.category_id = c.id
+                                LEFT JOIN authors a ON p.author_id = a.id
+                                WHERE p.category_id = ?";
+                  // Prepare statement
+                  $stmt = $this->conn->prepare($query);
 
-        if (!is_null($category_id)) {
-            $conditions[] = 'q.category_id = :category_id';
-            $parameters[':category_id'] = $category_id;
-        }
+                  // Bind ID
+                  $stmt->bindParam(1, $this->category_id);
+      } else{
+        $query = "SELECT c.category as category_name, a.author as author_name, p.id, p.category_id, p.quote, p.author_id
+                                FROM $this->table p
+                                LEFT JOIN categories c ON p.category_id = c.id
+                                LEFT JOIN authors a ON p.author_id = a.id
+                                ORDER BY p.id";
 
-        if (!empty($conditions)) {
-            $query .= ' WHERE ' . implode(' AND ', $conditions);
-        }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($parameters);
+                  // Prepare statement
+                  $stmt = $this->conn->prepare($query);
+      }
+
+      // Execute query
+        $stmt->execute();
 
         return $stmt;
     }
 
-    // Fetching a single quote by ID
-    public function readOne($id) {
-        $query = "SELECT q.id, q.quote, a.author, c.category
-                  FROM " . $this->table_name . " q
-                  JOIN authors a ON q.author_id = a.id
-                  JOIN categories c ON q.category_id = c.id
-                  WHERE q.id = :id LIMIT 0,1";
+    // Get Single Post
+    public function read_single() {
+          // Create query
+            $query = "SELECT c.category as category_name, a.author as author_name, p.id, p.category_id, p.quote, p.author_id
+                                    FROM $this->table p
+                                    LEFT JOIN categories c ON p.category_id = c.id
+                                    LEFT JOIN authors a ON p.author_id = a.id
+                                    WHERE p.id = ?
+                                    LIMIT 1";
+          // Prepare statement
+            $stmt = $this->conn->prepare($query);
 
-        $stmt = $this->conn->prepare($query);
+          // Bind ID
+            $stmt->bindParam(1, $this->id);
 
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
-        $stmt->execute();
+          // Execute query
+            $stmt->execute();
 
-        // Fetching the row
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Checking if a row was returned
-        if ($row) {
+            if($row){
+          // Set properties
             $this->id = $row['id'];
             $this->quote = $row['quote'];
-            $this->author_id = $row['author'];
-            $this->category_id = $row['category'];
-            
-            return true; // Found a quote
+            $this->author_name = $row['author_name'];
+            $this->category_name = $row['category_name'];
+            return true;
+          }else{
+            return false;
+          }
         }
-
-        return false; // No quote found
-    }
-
-
-    // Creating a new quote
+    // Create Post
     public function create() {
-        $query = "INSERT INTO " . $this->table_name . " (quote, author_id, category_id) VALUES (:quote, :author_id, :category_id)";
-        $stmt = $this->conn->prepare($query);
+          // Create query
+            $query = "INSERT INTO $this->table (quote, author_id, category_id) VALUES (:quote, :author_id, :category_id)";
 
-        $this->quote = htmlspecialchars(strip_tags($this->quote));
-        $this->author_id = htmlspecialchars(strip_tags($this->author_id));
-        $this->category_id = htmlspecialchars(strip_tags($this->category_id));
+          // Prepare statement
+            $stmt = $this->conn->prepare($query);
 
-        // binding values
-        $stmt->bindParam(':quote', $this->quote);
-        $stmt->bindParam(':author_id', $this->author_id);
-        $stmt->bindParam(':category_id', $this->category_id);
+          // Clean data
+            $this->quote = htmlspecialchars(strip_tags($this->quote));
+            $this->author_id = htmlspecialchars(strip_tags($this->author_id));
+            $this->category_id = htmlspecialchars(strip_tags($this->category_id));
 
-        if ($stmt->execute()) {
+          // Bind data
+            $stmt->bindParam(':quote', $this->quote);
+            $stmt->bindParam(':author_id', $this->author_id);
+            $stmt->bindParam(':category_id', $this->category_id);
+
+          // Execute query
+            if($stmt->execute()) {
             return true;
         }
+
+      // Print error if something goes wrong
+        printf("Error: %s.\n", $stmt->error);
+
         return false;
     }
 
-    // Updating an existing quote
+    // Update Post
     public function update() {
-        $query = "UPDATE " . $this->table_name . " 
-                  SET quote = :quote, author_id = :author_id, category_id = :category_id 
-                  WHERE id = :id";
-        $stmt = $this->conn->prepare($query);
+          // Create query
+            $query = "UPDATE $this->table 
+                                SET quote = :quote, author_id = :author_id, category_id = :category_id
+                                WHERE id = :id";
 
-        $this->id = htmlspecialchars(strip_tags($this->id));
-        $this->quote = htmlspecialchars(strip_tags($this->quote));
-        $this->author_id = htmlspecialchars(strip_tags($this->author_id));
-        $this->category_id = htmlspecialchars(strip_tags($this->category_id));
+          // Prepare statement
+            $stmt = $this->conn->prepare($query);
 
-        // binding values
-        $stmt->bindParam(':id', $this->id);
-        $stmt->bindParam(':quote', $this->quote);
-        $stmt->bindParam(':author_id', $this->author_id);
-        $stmt->bindParam(':category_id', $this->category_id);
+          // Clean data
+            $this->quote = htmlspecialchars(strip_tags($this->quote));
+            $this->author_id = htmlspecialchars(strip_tags($this->author_id));
+            $this->category_id = htmlspecialchars(strip_tags($this->category_id));
+            $this->id = htmlspecialchars(strip_tags($this->id));
 
-        if ($stmt->execute()) {
+          // Bind data
+            $stmt->bindParam(':quote', $this->quote);
+            $stmt->bindParam(':author_id', $this->author_id);
+            $stmt->bindParam(':category_id', $this->category_id);
+            $stmt->bindParam(':id', $this->id);
+
+          // Execute query
+            if($stmt->execute()) {
             return true;
-        }
-        return false;
+            }
+
+          // Print error if something goes wrong
+            printf("Error: %s.\n", $stmt->error);
+
+            return false;
     }
 
-    // Deleting a quote
+    // Delete Post
     public function delete() {
-        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
-        $stmt = $this->conn->prepare($query);
+          // Create query
+            $query = 'DELETE FROM ' . $this->table . ' WHERE id = :id';
 
-        $this->id = htmlspecialchars(strip_tags($this->id));
+          // Prepare statement
+            $stmt = $this->conn->prepare($query);
 
-        // binding id of record to delete
-        $stmt->bindParam(':id', $this->id);
+          // Clean data
+            $this->id = htmlspecialchars(strip_tags($this->id));
 
-        if ($stmt->execute()) {
+          // Bind data
+            $stmt->bindParam(':id', $this->id);
+
+          // Execute query
+            if($stmt->execute()) {
             return true;
+            }
+
+          // Print error if something goes wrong
+            printf("Error: %s.\n", $stmt->error);
+
+            return false;
         }
-        return false;
+    
     }
-}

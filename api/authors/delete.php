@@ -1,27 +1,43 @@
-<?php
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-require_once __DIR__ . '/../models/Author.php';
-require_once __DIR__ . '/../Database.php';
+<?php 
+  // Headers
+  header('Access-Control-Allow-Origin: *');
+  header('Content-Type: application/json');
+  header('Access-Control-Allow-Methods: DELETE');
+  header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-$db = (new Database())->getConnection();
-$authorModel = new Author($db);
+  include_once '../../config/Database.php';
+  include_once '../../models/Author.php';
 
-$data = json_decode(file_get_contents("php://input"), true);
+  // Instantiate DB & connect
+  $database = new Database();
+  $db = $database->connect();
 
-if (!empty($data['id'])) {
-    $authorModel->id = $data['id'];
+  // Instantiate author post object
+  $auth = new DBAuthor($db);
 
-    if ($authorModel->delete()) {
-        http_response_code(200);
-        echo json_encode(["message" => "Author deleted successfully."]);
-    } else {
-        http_response_code(503);
-        echo json_encode(["message" => "Unable to delete author."]);
-    }
-} else {
-    http_response_code(400);
-    echo json_encode(["message" => "Missing Required Parameters"]);
-}
+  // Get raw posted data
+  $data = json_decode(file_get_contents("php://input"));
+
+  // Set ID to update
+  $auth->id = $data->id;
+
+  $test = curl_init('http://localhost/api/authors/?id=' . $auth->id);
+  curl_setopt($test, CURLOPT_RETURNTRANSFER, true); // Set option to return the response
+  $response = curl_exec($test); // Execute the request and store the response
+  curl_close($test); // Close the cURL session
+  $test2 = array_values(json_decode($response,true));
+  if($test2[0] != $auth->id){
+
+    echo json_encode(array(
+        'message' => 'No Author Found'
+    ));
+    exit();
+  }
+
+  // Delete Author
+  if($auth->delete()) {
+    echo json_encode(
+      array('id' => $auth->id)
+    );
+  }
+

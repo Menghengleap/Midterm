@@ -1,28 +1,48 @@
-<?php
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-require_once __DIR__ . '/../models/Category.php';
-require_once __DIR__ . '/../Database.php';
+<?php 
+  // Headers
+  header('Access-Control-Allow-Origin: *');
+  header('Content-Type: application/json');
 
-$db = (new Database())->getConnection();
-$categoryModel = new Category($db);
+  include_once '../../config/Database.php';
+  include_once '../../models/Category.php';
 
-$stmt = $categoryModel->read();
-$num = $stmt->rowCount();
+  // Instantiate DB & connect
+  $database = new Database();
+  $db = $database->connect();
 
-if ($num > 0) {
-    $categories_arr = [];
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $categories_arr[] = [
-            "id" => $row['id'],
-            "category" => $row['category']
-        ];
-    }
-    http_response_code(200);
-    echo json_encode($categories_arr);
-} else {
-    http_response_code(404);
-    echo json_encode(["message" => "No categories found."]);
-}
+  // Instantiate category object
+  $cat = new DBCategory($db);
+
+  // Category read query
+  $result = $cat->read();
+  
+  // Get row count
+  $num = $result->rowCount();
+
+  // Check if any categories
+  if($num > 0) {
+        // Cat array
+        $cat_arr = array();
+        
+
+        while($row = $result->fetch(PDO::FETCH_ASSOC)) {
+          extract($row);
+
+          $cat_item = array(
+            'id' => $id,
+            'category' => $category
+          );
+
+          // Push to "data"
+          array_push($cat_arr, $cat_item);
+        }
+
+        // Turn to JSON & output
+        echo json_encode($cat_arr);
+
+  } else {
+        // No Categories
+        echo json_encode(
+          array('message' => 'No Categories Found')
+        );
+  }

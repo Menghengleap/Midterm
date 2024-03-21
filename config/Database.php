@@ -1,43 +1,37 @@
-<?php
-class Database {
-    // Database credentials
+<?php 
+
+    class Database {
+
+    private $conn;
     private $host;
-    private $db_name;
+    private $port;
+    private $dbname;
     private $username;
     private $password;
-    private $conn;
-    private $port;
-
-    // Constructor
+    
     public function __construct() {
+        
         $this->username = getenv('DBUSERNAME');
         $this->password = getenv('DBPASSWORD');
-        $this->db_name = getenv('DBNAME');
+        $this->dbname = getenv('DBNAME');
         $this->host = getenv('DBHOST');
         $this->port = getenv('DBPORT');
     }
 
-    // Getting the database connection
-    public function getConnection() {
+    public function connect(){
         if ($this->conn){
             return $this->conn;
-        } else{
-            $dsn = "pgsql:host={$this->host};port={$this->port};dbname={$this->db_name}";
+        } else {
+            $dsn = "pgsql:host={$this->host};port={$this->port};dbname={$this->dbname}";
+
+            try {        
+                $this->conn = new PDO($dsn, $this->username, $this->password);
+                $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                return $this->conn;
+            } catch (PDOException $e) {
+                echo 'Connection Error: ' . $e->getMessage();
+                }
+            }
         }
-        
-    
-        try {  
-            $this->conn = new PDO($dsn, $this->username, $this->password);
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            return $this->conn;
-        } catch(PDOException $exception) {
-            echo "Connection error: " . $exception->getMessage();
-            
-        }
-    
-        
-        
     }
-    
-}
+

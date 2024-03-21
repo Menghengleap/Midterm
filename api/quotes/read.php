@@ -1,32 +1,61 @@
-<?php
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-require_once __DIR__ . '/../models/Quote.php';
-require_once __DIR__ . '/../Database.php';
+<?php 
+  // Headers
+  header('Access-Control-Allow-Origin: *');
+  header('Content-Type: application/json');
 
-$db = (new Database())->getConnection();
-$quoteModel = new Quote($db);
-$params = []; // Add filtering logic if necessary
+  include_once '../../config/Database.php';
+  include_once '../../models/Quote.php';
 
-$stmt = $quoteModel->read($params['author_id'] ?? null, $params['category_id'] ?? null);
-$num = $stmt->rowCount();
+  // Instantiate DB & connect
+  $database = new Database();
+  $db = $database->connect();
 
-if ($num > 0) {
-    $quotes_arr = [];
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        extract($row);
-        $quotes_arr[] = [
-            "id" => $id,
-            "quote" => $quote,
-            "author_id" => $author_id,
-            "category_id" => $category_id,
-        ];
-    }
-    http_response_code(200);
-    echo json_encode($quotes_arr);
-} else {
-    http_response_code(404);
-    echo json_encode(["message" => "No Quotes Found"]);
+  // Instantiate blog post object
+  $quo = new DBQuote($db);
+  
+
+if (isset($_GET['author_id'])){
+  $quo->author_id = $_GET['author_id'];
 }
+if (isset($_GET['category_id'])){
+  $quo->category_id = $_GET['category_id'];
+}
+
+
+  // Blog post query
+  $result = $quo->read();
+  // Get row count
+  $num = $result->rowCount();
+
+  // Check if any posts
+  if($num > 0) {
+    // Post array
+    $quo_arr = array();
+    // $posts_arr['data'] = array();
+
+    while($row = $result->fetch(PDO::FETCH_ASSOC)) {
+      extract($row);
+
+      $quo_item = array(
+        'id' => $id,
+        'quote' => $quote,
+        'author' => $author_name,
+        'category' => $category_name
+      );
+
+      // Push to "data"
+      array_push($quo_arr, $quo_item);
+      // array_push($posts_arr['data'], $post_item);
+    }
+
+    // Turn to JSON & output
+    $json_data = json_encode($quo_arr);
+
+    // Decode HTML entities before echoing
+    echo htmlspecialchars_decode($json_data);
+  } else {
+    // No Posts
+    echo json_encode(
+      array('message' => 'No Quotes Found')
+    );
+  }
