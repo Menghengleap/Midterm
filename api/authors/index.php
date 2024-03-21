@@ -1,9 +1,30 @@
 <?php
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
-// This file can act as a router or entry point for different API requests.
-// Typically, you would use this to direct requests to different files based on the request method and path.
-// For simplicity, here's just a placeholder content:
-echo "API index. Use the specific endpoints for authors.";
+
+// Include necessary files
+require_once __DIR__ . '/../models/Quote.php';
+require_once __DIR__ . '/../Database.php';
+
+// Create a new database connection
+$db = (new Database())->getConnection();
+
+// Create a new instance of the Quote model
+$quoteModel = new Quote($db);
+
+// Fetch all quotes (no filtering parameters provided)
+$stmt = $quoteModel->read();
+
+// Fetch the quotes as an associative array
+$quotes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Check if quotes were found
+if ($quotes) {
+    // Output the quotes as JSON
+    echo json_encode($quotes);
+} else {
+    // No quotes found
+    http_response_code(404);
+    echo json_encode(["message" => "No quotes found"]);
+}
+?>
