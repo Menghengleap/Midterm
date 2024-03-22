@@ -2,23 +2,25 @@
 
     class Database {
 
+    private $username;
+    private $dbname;
     private $conn;
+    private $password;
     private $host;
     private $port;
-    private $dbname;
-    private $username;
-    private $password;
+
     
     public function __construct() {
         
-        $this->username = getenv('DBUSERNAME');
-        $this->password = getenv('DBPASSWORD');
         $this->dbname = getenv('DBNAME');
         $this->host = getenv('DBHOST');
+        $this->username = getenv('DBUSERNAME');
         $this->port = getenv('DBPORT');
+        $this->password = getenv('DBPASSWORD');
+
     }
 
-    public function connect(){
+    public function getConnection(){
         if ($this->conn){
             return $this->conn;
         } else {
