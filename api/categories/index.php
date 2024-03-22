@@ -48,16 +48,8 @@
             echo("Required file not found!"); 
         }
     }
-    else if ($method === 'DELETE') {
-        try {
-            require_once 'delete.php'; 
-
-        }
-        catch(ErrorException $e)
-        {
-            echo("Required file not found!"); 
-        }
-    }
+    
+    
     else // Respond if the HTTP method is not supported by this script
         echo ("No function requested"); // Error message for unsupported or missing method
 ?>
