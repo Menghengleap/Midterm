@@ -14,7 +14,7 @@
     }
 
     // Get authors
-    public function read() {
+    public function GET() {
       // Create query
         $query = "SELECT
         id,
@@ -67,7 +67,7 @@
     }
 
   // Create author
-    public function create() {
+    public function CREATE() {
     // Create Query
     $query = "INSERT INTO $this->table (author) VALUES (:author);";
 

@@ -8,7 +8,7 @@
 
   // Instantiate DB & connect
   $database = new Database();
-  $db = $database->connect();
+  $db = $database->getConnection();
 
   // Instantiate blog post object
   $quo = new DBQuote($db);
@@ -23,7 +23,7 @@ if (isset($_GET['category_id'])){
 
 
   // Blog post query
-  $result = $quo->read();
+  $result = $quo->GET();
   // Get row count
   $num = $result->rowCount();
 

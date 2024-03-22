@@ -8,7 +8,7 @@
 
   // Instantiate DB & connect
   $database = new Database();
-  $db = $database->connect();
+  $db = $database->getConnection();
 
   // Instantiate blog post object
   $quo = new DBQuote($db);

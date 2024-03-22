@@ -8,13 +8,13 @@
 
   // Instantiate DB & connect
   $database = new Database();
-  $db = $database->connect();
+  $db = $database->getConnection();
 
   // Instantiate category object
   $cat = new DBCategory($db);
 
   // Category read query
-  $result = $cat->read();
+  $result = $cat->GET();
   
   // Get row count
   $num = $result->rowCount();

@@ -10,7 +10,7 @@
   
   // Instantiate DB & connect
   $database = new Database();
-  $db = $database->connect();
+  $db = $database->getConnection();
 
   // Instantiate Category post object
   $cat = new DBCategory($db);

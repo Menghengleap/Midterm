@@ -8,13 +8,13 @@
 
   // Instantiate DB & connect
   $database = new Database();
-  $db = $database->connect();
+  $db = $database->getConnection();
 
   // Instantiate blog post object
   $auth = new DBAuthor($db);
 
   // Blog post query
-  $result = $auth->read();
+  $result = $auth->GET();
 
   // Get row count
   $num = $result->rowCount();

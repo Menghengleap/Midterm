@@ -18,7 +18,7 @@
     }
 
     // Get Quotes
-    public function read() {
+    public function GET() {
       
       // Create query
       if (isset($this->author_id) && isset($this->category_id)){

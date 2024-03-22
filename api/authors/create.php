@@ -10,7 +10,7 @@
 
   // Instantiate DB & connect
   $database = new Database();
-  $db = $database->connect();
+  $db = $database->getConnection();
 
   // Instantiate Author post object
   $auth = new DBAuthor($db);
@@ -27,7 +27,7 @@
   $auth->author = $data->author;
 
   // Create post
-  if($auth->create()) {
+  if($auth->CREATE()) {
     
     echo json_encode(array('id' => $db->lastInsertId(), 'author'=>$auth->author));
   }
