@@ -16,9 +16,6 @@
   // Initialize a new Category instance
   $cat = new DBCategory($db);
 
-  // Decode the JSON body from the request
-  $data = json_decode(file_get_contents("php://input"));
-
   // Validate the presence of essential parameters
   if(!isset($data->id) || !isset($data->category)){
     echo json_encode(array('message' => 'Missing Required Parameters'));
