@@ -11,7 +11,7 @@
   $db = $database->getConnection();
 
   // Instantiate blog post object
-  $auth = new DBAuthor($db);
+  $auth = new Author($db);
 
   // Blog post query
   $result = $auth->GET();

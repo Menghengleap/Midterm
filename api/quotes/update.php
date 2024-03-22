@@ -33,7 +33,7 @@
   $quo->category_id = $data->category_id;
 
 
-  $auth = new DBAuthor($db);
+  $auth = new Author($db);
     $cat = new DBCategory($db);
     $auth->id = $quo->author_id;
     $cat->id = $quo->category_id;

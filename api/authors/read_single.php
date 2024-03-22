@@ -11,7 +11,7 @@
   $db = $database->getConnection();
 
   // Instantiate Author post object
-  $auth = new DBAuthor($db);
+  $auth = new Author($db);
 
   // Get ID
   $auth->id = isset($_GET['id']) ? $_GET['id'] : die();

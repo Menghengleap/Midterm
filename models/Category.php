@@ -66,7 +66,7 @@
   }
 
   // Create Category
-  public function create() {
+  public function CREATE() {
     // Create Query
     $query = "INSERT INTO $this->table (category) VALUES (:category);";
 

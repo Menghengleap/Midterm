@@ -39,10 +39,7 @@
                                 LEFT JOIN categories c ON p.category_id = c.id
                                 LEFT JOIN authors a ON p.author_id = a.id
                                 WHERE p.author_id = ?";
-                  // Prepare statement
                   $stmt = $this->conn->prepare($query);
-
-                  // Bind ID
                   $stmt->bindParam(1, $this->author_id);
       }
       else if(isset($this->category_id)){
@@ -51,10 +48,7 @@
                                 LEFT JOIN categories c ON p.category_id = c.id
                                 LEFT JOIN authors a ON p.author_id = a.id
                                 WHERE p.category_id = ?";
-                  // Prepare statement
                   $stmt = $this->conn->prepare($query);
-
-                  // Bind ID
                   $stmt->bindParam(1, $this->category_id);
       } else{
         $query = "SELECT c.category as category_name, a.author as author_name, p.id, p.category_id, p.quote, p.author_id
@@ -62,9 +56,6 @@
                                 LEFT JOIN categories c ON p.category_id = c.id
                                 LEFT JOIN authors a ON p.author_id = a.id
                                 ORDER BY p.id";
-
-
-                  // Prepare statement
                   $stmt = $this->conn->prepare($query);
       }
 
@@ -107,7 +98,7 @@
           }
         }
     // Create Post
-    public function create() {
+    public function CREATE() {
           // Create query
             $query = "INSERT INTO $this->table (quote, author_id, category_id) VALUES (:quote, :author_id, :category_id)";
 

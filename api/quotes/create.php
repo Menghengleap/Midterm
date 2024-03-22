@@ -18,7 +18,7 @@
   $quo = new DBQuote($db);
 
   //create author and category object
-  $auth = new DBAuthor($db);
+  $auth = new Author($db);
   $cat = new DBCategory($db);
 
   // Get raw posted data
@@ -53,7 +53,7 @@
     }
 
   // Create quote
-  if($quo->create()) {
+  if($quo->CREATE()) {
 
     $quo->id = $db->lastInsertId();
 

@@ -13,7 +13,7 @@
   $db = $database->getConnection();
 
   // Instantiate Author post object
-  $auth = new DBAuthor($db);
+  $auth = new Author($db);
 
   // Get raw posted data
   $data = json_decode(file_get_contents("php://input"));
