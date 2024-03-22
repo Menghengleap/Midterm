@@ -8,7 +8,7 @@
         header('Access-Control-Allow-Headers: Origin, Accept, Content-Type, X-Requested-With');
         exit();
     }
-    if ($method === 'GET') {
+    if ($method == 'GET') {
         try {
             if (isset($_GET['id'])){
                 require_once 'read_single.php';
