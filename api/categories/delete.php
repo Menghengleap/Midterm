@@ -1,42 +1,45 @@
 <?php
-  // Headers
+  // Define the necessary HTTP headers for the API response and CORS
   header('Access-Control-Allow-Origin: *');
   header('Content-Type: application/json');
   header('Access-Control-Allow-Methods: DELETE');
   header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization,X-Requested-With');
 
+  // Include the database and category model for operations
   include_once '../../config/Database.php';
   include_once '../../models/Category.php';
 
-  // Instantiate DB & connect
+  // Initialize and connect to the database
   $database = new Database();
   $db = $database->getConnection();
 
-  // Instantiate category post object
+  // Create a new category instance for manipulation
   $cat = new DBCategory($db);
 
-  // Get raw posted data
+  // Extract the JSON content from the request body
   $data = json_decode(file_get_contents("php://input"));
 
-  // Set ID to UPDATE
+  // Assign the provided ID to the category object for deletion
   $cat->id = $data->id;
 
+  // Validate category existence before proceeding with deletion
   $test = curl_init('http://localhost/api/categories/?id=' . $cat->id);
-    curl_setopt($test, CURLOPT_RETURNTRANSFER, true); // Set option to return the response
-    $response = curl_exec($test); // Execute the request and store the response
-    curl_close($test); // Close the cURL session
+    curl_setopt($test, CURLOPT_RETURNTRANSFER, true); // Ensure the cURL response is returned
+    $response = curl_exec($test); // Perform the cURL session and receive response
+    curl_close($test); // Terminate the cURL session
     $test2 = array_values(json_decode($response,true));
     if($test2[0] != $cat->id){
 
       echo json_encode(array(
-          'message' => 'No Category Found'
+          'message' => 'No Category Found' // Notify user if category does not exist
       ));
       exit();
     }
 
-  // Delete Category
+  // Proceed with category deletion if validation passes
   if($cat->delete()) {
     echo json_encode(
-      array('id' => $cat->id)
+      array('id' => $cat->id) // Confirm successful deletion with category ID
     );
   } 
+?>

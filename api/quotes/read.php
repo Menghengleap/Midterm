@@ -1,37 +1,36 @@
 <?php 
-  // Headers
+  // Headers //
   header('Access-Control-Allow-Origin: *');
   header('Content-Type: application/json');
 
   include_once '../../config/Database.php';
   include_once '../../models/Quote.php';
 
-  // Instantiate DB & connect
+  // Instantiate DB & connection //
   $database = new Database();
   $db = $database->getConnection();
 
-  // Instantiate blog post object
+  // Instantiate quote object //
   $quo = new DBQuote($db);
   
 
-if (isset($_GET['author_id'])){
-  $quo->author_id = $_GET['author_id'];
-}
-if (isset($_GET['category_id'])){
-  $quo->category_id = $_GET['category_id'];
-}
+  if (isset($_GET['author_id'])){
+    $quo->author_id = $_GET['author_id'];
+  }
+  if (isset($_GET['category_id'])){
+    $quo->category_id = $_GET['category_id'];
+  }
 
 
-  // Blog post query
+  // Quote query //
   $result = $quo->GET();
-  // Get row count
+  // Get row count //
   $num = $result->rowCount();
 
-  // Check if any posts
+  // Check if any quotes //
   if($num > 0) {
-    // Post array
+    // Quote array //
     $quo_arr = array();
-    // $posts_arr['data'] = array();
 
     while($row = $result->fetch(PDO::FETCH_ASSOC)) {
       extract($row);
@@ -43,19 +42,21 @@ if (isset($_GET['category_id'])){
         'category' => $category_name
       );
 
-      // Push to "data"
+      // Push to "data" //
       array_push($quo_arr, $quo_item);
-      // array_push($posts_arr['data'], $post_item);
+      
     }
 
-    // Turn to JSON & output
+    // Turn to JSON & output //
     $json_data = json_encode($quo_arr);
 
-    // Decode HTML entities before echoing
+    // Decode HTML entities before echoing //
     echo htmlspecialchars_decode($json_data);
   } else {
-    // No Posts
+    // No Quotes //
     echo json_encode(
       array('message' => 'No Quotes Found')
     );
   }
+// End of script //
+?>

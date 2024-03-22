@@ -1,6 +1,6 @@
 <?php
   class DBCategory {
-    // DB Stuff
+    // Database connection
     private $conn;
     private $table = 'categories';
 
@@ -8,12 +8,12 @@
     public $id;
     public $category;
     
-    // Constructor with DB
+    // Constructor with database
     public function __construct($db) {
       $this->conn = $db;
     }
 
-    // Get categories
+    // Get all categories
     public function GET() {
       // Create query
       $query = "SELECT
@@ -34,9 +34,9 @@
     }
 
     // Get Single Category
-  public function read_single(){
-    // Create query
-    $query = "SELECT
+    public function read_single(){
+      // Create query
+      $query = "SELECT
           id,
           category
         FROM
@@ -44,7 +44,7 @@
       WHERE id = ?
       LIMIT 1";
 
-      //Prepare statement
+      // Prepare statement
       $stmt = $this->conn->prepare($query);
 
       // Bind ID
@@ -56,94 +56,94 @@
       $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
       if($row){
-      // set properties
-      $this->id = $row['id'];
-      $this->category = $row['category'];
-      return true;
-      }else{
+        // set properties
+        $this->id = $row['id'];
+        $this->category = $row['category'];
+        return true;
+      } else {
         return false;
       }
-  }
+    }
 
-  // Create Category
-  public function CREATE() {
-    // Create Query
-    $query = "INSERT INTO $this->table (category) VALUES (:category);";
+    // Create Category
+    public function CREATE() {
+      // Create Query
+      $query = "INSERT INTO $this->table (category) VALUES (:category);";
 
-  // Prepare Statement
-  $stmt = $this->conn->prepare($query);
+      // Prepare Statement
+      $stmt = $this->conn->prepare($query);
 
-  // Clean data
-  $this->category = htmlspecialchars(strip_tags($this->category));
+      // Clean data
+      $this->category = htmlspecialchars(strip_tags($this->category));
 
-  // Bind data
-  $stmt-> bindParam(':category', $this->category);
+      // Bind data
+      $stmt-> bindParam(':category', $this->category);
 
-  // Execute query
-  if($stmt->execute()) {
-    return true;
-  }
+      // Execute query
+      if($stmt->execute()) {
+        return true;
+      }
 
-  // Print error if something goes wrong
-  printf("Error: %s.\n", $stmt->error);
+      // Print error if something goes wrong
+      printf("Error: %s.\n", $stmt->error);
 
-  return false;
-  }
+      return false;
+    }
 
-  // Update Category
-  public function update() {
-    // Create Query
-    $query = "UPDATE
-      $this->table 
-    SET
-      category = :category
+    // Update Category
+    public function update() {
+      // Create Query
+      $query = "UPDATE
+        $this->table 
+      SET
+        category = :category
       WHERE
-      id = :id";
+        id = :id";
 
-  // Prepare Statement
-  $stmt = $this->conn->prepare($query);
+      // Prepare Statement
+      $stmt = $this->conn->prepare($query);
 
-  // Clean data
-  $this->category = htmlspecialchars(strip_tags($this->category));
-  $this->id = htmlspecialchars(strip_tags($this->id));
+      // Clean data
+      $this->category = htmlspecialchars(strip_tags($this->category));
+      $this->id = htmlspecialchars(strip_tags($this->id));
 
-  // Bind data
-  $stmt-> bindParam(':category', $this->category);
-  $stmt-> bindParam(':id', $this->id);
+      // Bind data
+      $stmt-> bindParam(':category', $this->category);
+      $stmt-> bindParam(':id', $this->id);
 
-  // Execute query
-  if($stmt->execute()) {
-    return true;
-  }
+      // Execute query
+      if($stmt->execute()) {
+        return true;
+      }
 
-  // Print error if something goes wrong
-  printf("Error: %s.\n", $stmt->error);
+      // Print error if something goes wrong
+      printf("Error: %s.\n", $stmt->error);
 
-  return false;
-  }
+      return false;
+    }
 
-  // Delete Category
-  public function delete() {
-    // Create query
-    $query = 'DELETE FROM ' . $this->table . ' WHERE id = :id';
+    // Delete Category
+    public function delete() {
+      // Create query
+      $query = 'DELETE FROM ' . $this->table . ' WHERE id = :id';
 
-    // Prepare Statement
-    $stmt = $this->conn->prepare($query);
+      // Prepare Statement
+      $stmt = $this->conn->prepare($query);
 
-    // clean data
-    $this->id = htmlspecialchars(strip_tags($this->id));
+      // Clean data
+      $this->id = htmlspecialchars(strip_tags($this->id));
 
-    // Bind Data
-    $stmt-> bindParam(':id', $this->id);
+      // Bind Data
+      $stmt-> bindParam(':id', $this->id);
 
-    // Execute query
-    if($stmt->execute()) {
-      return true;
-    }else{
-
-    // Print error if something goes wrong
-    printf("Error: %s.\n", $stmt->error);
-
-    return false;}
+      // Execute query
+      if($stmt->execute()) {
+        return true;
+      } else {
+        // Print error if something goes wrong
+        printf("Error: %s.\n", $stmt->error);
+        return false;
+      }
     }
   }
+?>

@@ -8,14 +8,13 @@
         header('Access-Control-Allow-Headers: Origin, Accept, Content-Type, X-Requested-With');
         exit();
     }
-     // If statement for type
-        if ($method === 'GET') {
+    if ($method === 'GET') {
         try {
             if (isset($_GET['id'])){
-            require_once 'read_single.php';
+                require_once 'read_single.php';
             }
             else{
-            require_once 'read.php';
+                require_once 'read.php';
             }
 
         }
@@ -59,4 +58,5 @@
         }
     }
     else
-        echo ("No function requested");
+        echo ("No function requested"); // 
+?>

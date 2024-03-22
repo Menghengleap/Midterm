@@ -1,20 +1,20 @@
 <?php 
-  // Headers
+  // Headers //
   header('Access-Control-Allow-Origin: *');
   header('Content-Type: application/json');
 
   include_once '../../config/Database.php';
   include_once '../../models/Quote.php';
 
-  // Instantiate DB & connect
+  // Instantiate DB & connect //
   $database = new Database();
   $db = $database->getConnection();
 
-  // Instantiate blog post object
+  // Instantiate quote object //
   $quo = new DBQuote($db);
 
 
-  // Get ID
+  // Get ID //
   $quo->id = isset($_GET['id']) ? $_GET['id'] : die();
 
 
@@ -39,4 +39,5 @@
       echo json_encode(
         array('message' => 'No Quotes Found')
       );
-    }
+    } // End of script
+?>

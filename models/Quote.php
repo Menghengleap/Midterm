@@ -1,10 +1,11 @@
+
 <?php 
     class DBQuote {
-    // DB stuff
+    // Database connection
     private $conn;
     private $table = 'quotes';
 
-    // Post Properties
+    // Quote Properties
     public $id;
     public $quote;
     public $author_id;
@@ -12,7 +13,7 @@
     public $category_id;
     public $category_name;
 
-    // Constructor with DB
+    // Constructor with database
     public function __construct($db) {
         $this->conn = $db;
     }
@@ -65,7 +66,7 @@
         return $stmt;
     }
 
-    // Get Single Post
+    // Get Single Quote
     public function read_single() {
           // Create query
             $query = "SELECT c.category as category_name, a.author as author_name, p.id, p.category_id, p.quote, p.author_id
@@ -97,7 +98,7 @@
             return false;
           }
         }
-    // Create Post
+    // Create Quote
     public function CREATE() {
           // Create query
             $query = "INSERT INTO $this->table (quote, author_id, category_id) VALUES (:quote, :author_id, :category_id)";
@@ -126,7 +127,7 @@
         return false;
     }
 
-    // Update Post
+    // Update Quote
     public function update() {
           // Create query
             $query = "UPDATE $this->table 
@@ -159,7 +160,7 @@
             return false;
     }
 
-    // Delete Post
+    // Delete Quote
     public function delete() {
           // Create query
             $query = 'DELETE FROM ' . $this->table . ' WHERE id = :id';
@@ -170,18 +171,14 @@
           // Clean data
             $this->id = htmlspecialchars(strip_tags($this->id));
 
-          // Bind data
+          // call data
             $stmt->bindParam(':id', $this->id);
-
-          // Execute query
             if($stmt->execute()) {
             return true;
             }
-
-          // Print error if something goes wrong
             printf("Error: %s.\n", $stmt->error);
 
             return false;
         }
-    
+  
     }
