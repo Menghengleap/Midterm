@@ -29,11 +29,6 @@
         while($row = $result->fetch(PDO::FETCH_ASSOC)) {
           extract($row);
 
-          // Construct a category item array
-          $cat_item = array(
-            'id' => $id,
-            'category' => $category
-          );
 
           // Add the category item to the main array
           array_push($cat_arr, $cat_item);
